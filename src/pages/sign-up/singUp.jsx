@@ -1,18 +1,35 @@
 import { Button, Form, Input } from "antd";
-import React from "react";
+import React, { useState } from "react";
 import { useAxios } from "../../hooks/useAxios";
+import { useNavigate } from "react-router-dom";
+import { Loader } from "lucide-react";
+import {toast} from "react-hot-toast";
 
 const SingUp = () => {
   const axios = useAxios();
-
+  const [loading, setLoading] = useState(false);
+  const navigate=useNavigate()
   const register = (e) => {
+    setLoading(true);
     axios({
       url: "api/auth/sign-up",
       method: "POST",
       body: e,
     })
-      .then((res) => console.log(res))
-      .catch((error) => console.log(error));
+      .then((res) => {
+        if (res?.data?.success) {
+          toast.success("Iltimos emailinggizga borgan parolni kiriting");
+          navigate("/verify-password");
+        } else {
+          toast.error(res?.data?.message || "Noma'lum xatolik yuz berdi");
+          navigate("/sign-in");
+        }
+      })
+      .catch((error) => {
+        toast.error(error?.response?.data?.message || "Server xatosi yuz berdi");
+        navigate("/sign-in");
+      })
+      .finally(() => setLoading(false));
   };
   return (
     <div className="h-screen w-[400px] flex items-center justify-center m-auto flex-col ">
@@ -64,7 +81,7 @@ const SingUp = () => {
             <Input.Password placeholder="********" autoComplete="password" />
           </Form.Item>
           <Button className="w-full" htmlType="submit" type="primary">
-            Register
+              {loading ? <Loader className="animate-spin" /> : " Register"}
           </Button>
         </Form>
       </div>
