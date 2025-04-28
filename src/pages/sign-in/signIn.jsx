@@ -3,15 +3,25 @@ import Password from "antd/es/input/Password";
 import React, { useState } from "react";
 import { useAxios } from "../../hooks/useAxios";
 import { Loader } from "lucide-react";
+import toast from "react-hot-toast";
+import { Link, useNavigate } from "react-router-dom";
 
 const SignIn = () => {
   const axios = useAxios();
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const login = (e) => {
     setLoading(true);
     axios({ url: "api/auth/sign-in", method: "POST", body: e })
-      .then((data) => console.log(data))
-      .catch((error) => console.log(error))
+      .then((data) => {
+        toast.success("Xush kelibisiz");
+        let { token } = data;
+        localStorage.setItem("token", token);
+        navigate('/')
+      })
+      .catch((error) => {
+        toast.error("Email yoki parol xato !");
+      })
       .finally(() => setLoading(false));
   };
   return (
@@ -40,10 +50,11 @@ const SignIn = () => {
             ]}
           >
             <Input.Password
-              placeholder="******"
+              placeholder="********"
               autoComplete="current-password"
             />
           </Form.Item>
+          <Link to={'/sign-up'}>Ro'yxatdan o'tmaganmisiz</Link>
           <Button htmlType="submit" className="w-full" type="primary">
             {loading ? <Loader className="animate-spin" /> : " Login"}
           </Button>
